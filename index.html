@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carnet de Tournée</title>
+<style>
+  :root{
+    color-scheme: light;
+    --paper:#fbf3ef;
+    --card:#fffcfa;
+    --card-2:#f7e9e2;
+    --ink:#4a3a34;
+    --ink-soft:#8a7269;
+    --muted:#ab9389;
+    --line:#eeddd3;
+    --line-strong:#e0c6b8;
+    --accent:#c98d86;
+    --accent-strong:#a86962;
+    --accent-soft:#f6e5e0;
+    --accent-ink:#fffaf9;
+    --good:#7c9a6a;
+    --warn-ink:#8a6a3d;
+    --warn-fill:#ecc98f;
+    --critical:#c07872;
+    --shadow:rgba(120,90,80,.10);
+    --focus:#a86962;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --paper:#241c1a;
+      --card:#2e2321;
+      --card-2:#372a27;
+      --ink:#f3e6e0;
+      --ink-soft:#d6bdb3;
+      --muted:#ab9389;
+      --line:#453531;
+      --line-strong:#57433d;
+      --accent:#e3aba5;
+      --accent-strong:#eec3bd;
+      --accent-soft:#3d2b28;
+      --accent-ink:#271916;
+      --good:#a3c28c;
+      --warn-ink:#e3c58a;
+      --warn-fill:#c9a066;
+      --critical:#e0968f;
+      --shadow:rgba(0,0,0,.45);
+      --focus:#eec3bd;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --paper:#241c1a;
+    --card:#2e2321;
+    --card-2:#372a27;
+    --ink:#f3e6e0;
+    --ink-soft:#d6bdb3;
+    --muted:#ab9389;
+    --line:#453531;
+    --line-strong:#57433d;
+    --accent:#e3aba5;
+    --accent-strong:#eec3bd;
+    --accent-soft:#3d2b28;
+    --accent-ink:#271916;
+    --good:#a3c28c;
+    --warn-ink:#e3c58a;
+    --warn-fill:#c9a066;
+    --critical:#e0968f;
+    --shadow:rgba(0,0,0,.45);
+    --focus:#eec3bd;
+  }
+
+  [hidden]{display:none !important;}
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding-inline:16px;
+    padding-block:calc(24px + env(safe-area-inset-top,0px)) calc(48px + env(safe-area-inset-bottom,0px));
+  }
+  h1,h2,h3{
+    font-family:Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    margin:0; text-wrap:balance;
+  }
+  .mono, .num{font-family:ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;}
+  a{color:var(--accent);}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+
+  .app{max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:20px;}
+
+  .topbar{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .brand-mark{display:flex; align-items:center; gap:10px;}
+  .brand-mark .glyph{
+    width:38px; height:38px; border-radius:9px; background:var(--accent);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    box-shadow:0 2px 6px var(--shadow);
+  }
+  .brand-mark .glyph svg{width:20px; height:20px; stroke:var(--accent-ink); fill:none; stroke-width:1.8;}
+  .brand h1{font-size:1.5rem; font-weight:600; line-height:1.1; letter-spacing:-.01em;}
+  .brand p{margin:2px 0 0; font-size:.82rem; color:var(--ink-soft); font-family:inherit;}
+  .icon-btn{
+    width:40px; height:40px; border-radius:10px; border:1px solid var(--line-strong);
+    background:var(--card); color:var(--ink-soft); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex-shrink:0;
+  }
+  .icon-btn:hover{color:var(--ink); border-color:var(--accent);}
+  .icon-btn svg{width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.8;}
+
+  .security-note{
+    display:flex; gap:10px; align-items:flex-start;
+    background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius:12px; padding:12px 14px; font-size:.82rem; color:var(--ink-soft);
+  }
+  .security-note svg{width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:1.8; flex-shrink:0; margin-top:2px;}
+  .security-note strong{color:var(--ink); font-weight:600;}
+  .security-note ul{margin:6px 0 0; padding-left:18px;}
+  .security-note li{margin:2px 0;}
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:18px; box-shadow:0 1px 2px var(--shadow);
+  }
+  .card > h2{font-size:1rem; font-weight:600; margin-bottom:2px;}
+  .card .card-sub{font-size:.78rem; color:var(--muted); margin:0 0 14px; font-family:system-ui, -apple-system, "Segoe UI", sans-serif;}
+
+  .day-head{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+  .date-field{display:flex; align-items:center; gap:8px;}
+  .date-field input[type="date"]{
+    font-family:ui-monospace, monospace; font-size:.88rem; padding:8px 10px;
+    border-radius:9px; border:1px solid var(--line-strong); background:var(--card-2); color:var(--ink);
+  }
+  .day-nav{display:flex; gap:4px;}
+  .day-nav button{
+    width:32px; height:32px; border-radius:8px; border:1px solid var(--line-strong);
+    background:var(--card-2); color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .day-nav button:hover{color:var(--ink); border-color:var(--accent);}
+  .day-nav svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;}
+
+  .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px;}
+  .stat-tile{
+    background:var(--card-2); border:1px solid var(--line); border-radius:12px; padding:12px 12px;
+    display:flex; flex-direction:column; gap:4px; min-width:0;
+  }
+  .stat-tile .label{font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-family:system-ui, sans-serif;}
+  .stat-tile .value{font-size:1.28rem; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .stat-tile.hero{background:var(--accent-soft);}
+  .stat-tile.hero .value{color:var(--accent-strong); font-size:1.5rem;}
+
+  .field-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .field{display:flex; flex-direction:column; gap:5px; min-width:0;}
+  .field.full{grid-column:1/-1;}
+  .field label{font-size:.72rem; color:var(--ink-soft); font-weight:500;}
+  .field input[type="text"], .field input[type="number"], .field input[type="time"], .field select{
+    font:inherit; font-size:.9rem; padding:9px 10px; border-radius:9px;
+    border:1px solid var(--line-strong); background:var(--card-2); color:var(--ink); width:100%;
+  }
+  .field select{appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23948e7c' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:28px;}
+  .check-row{display:flex; align-items:center; gap:8px; padding:9px 2px;}
+  .check-row input{width:16px; height:16px; accent-color:var(--accent); flex-shrink:0;}
+  .check-row label{font-size:.84rem; color:var(--ink);}
+  .type-toggle{display:flex; gap:6px; flex-wrap:wrap;}
+  .type-toggle button{
+    flex:1; min-width:64px; padding:8px 6px; font-size:.78rem; font-weight:500; border-radius:8px;
+    border:1px solid var(--line-strong); background:var(--card-2); color:var(--ink-soft); cursor:pointer;
+  }
+  .type-toggle button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+
+  .subhead{font-size:.78rem; font-weight:600; color:var(--ink-soft); margin:14px 0 6px; display:flex; align-items:center; gap:6px;}
+
+  .act-list{
+    display:flex; flex-direction:column; border:1px solid var(--line-strong); border-radius:10px;
+    max-height:216px; overflow-y:auto; background:var(--card-2);
+  }
+  .act-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px;
+    border-bottom:1px solid var(--line); font-size:.83rem; cursor:pointer;
+  }
+  .act-item:last-child{border-bottom:none;}
+  .act-item:hover{background:var(--accent-soft);}
+  .act-item input{width:16px; height:16px; accent-color:var(--accent); flex-shrink:0;}
+  .act-item .act-label{flex:1; display:flex; align-items:center; gap:8px;}
+  .act-item .act-code{font-family:ui-monospace,monospace; font-size:.74rem; color:var(--muted); white-space:nowrap;}
+  .custom-act-row{display:flex; gap:8px; margin-top:8px; align-items:flex-end;}
+  .custom-act-row .field{flex:1;}
+  .custom-act-row .field.coef{max-width:96px;}
+  .chip-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; background:var(--accent-soft); color:var(--accent-strong);
+    border-radius:999px; padding:4px 6px 4px 10px; font-size:.76rem; font-weight:500;
+  }
+  .chip button{background:none; border:none; color:inherit; cursor:pointer; padding:2px; display:flex;}
+  .chip button svg{width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2.4;}
+
+  .breakdown{
+    background:var(--accent-soft); border-radius:10px; padding:10px 12px; margin-top:10px;
+    font-size:.8rem; color:var(--accent-strong); display:flex; flex-direction:column; gap:3px;
+  }
+  .breakdown .line{display:flex; justify-content:space-between; gap:8px;}
+  .breakdown .line .num{font-size:.8rem;}
+  .breakdown .note{font-size:.72rem; color:var(--ink-soft); margin-top:2px;}
+
+  .majo-grid{display:flex; flex-direction:column; gap:2px; border:1px solid var(--line); border-radius:10px; padding:6px 10px; background:var(--card-2);}
+  .majo-item{display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--line); font-size:.83rem;}
+  .majo-item:last-child{border-bottom:none;}
+  .majo-item.is-disabled{opacity:.45;}
+  .majo-item.is-disabled input{cursor:not-allowed;}
+  .majo-item input{width:16px; height:16px; accent-color:var(--accent); flex-shrink:0;}
+  .majo-item .majo-text{flex:1; display:flex; flex-direction:column;}
+  .majo-item .majo-title{color:var(--ink);}
+  .majo-item .majo-hint{font-size:.7rem; color:var(--muted);}
+  .majo-item .majo-amt{font-family:ui-monospace,monospace; font-size:.8rem; color:var(--accent-strong); white-space:nowrap;}
+  .badge-auto{
+    font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    background:var(--warn-fill); color:#3a2a04; border-radius:5px; padding:1px 5px; margin-left:6px;
+  }
+  .nuit-group{display:flex; flex-direction:column; gap:2px;}
+  .nuit-option{display:flex; align-items:center; gap:8px; padding:5px 0; font-size:.8rem;}
+  .nuit-option input{width:15px; height:15px; accent-color:var(--accent);}
+
+  .disclaimer{
+    font-size:.72rem; color:var(--muted); margin-top:10px; padding:8px 10px; border-left:2px solid var(--line-strong);
+    line-height:1.5;
+  }
+
+  .form-actions{display:flex; justify-content:flex-end; margin-top:14px;}
+  .btn{
+    font:inherit; font-size:.86rem; font-weight:600; padding:10px 18px; border-radius:10px; border:1px solid transparent;
+    cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-primary{background:var(--accent); color:var(--accent-ink);}
+  .btn-primary:hover{background:var(--accent-strong);}
+  .btn-ghost{background:transparent; border-color:var(--line-strong); color:var(--ink-soft);}
+  .btn-ghost:hover{color:var(--ink); border-color:var(--accent);}
+  .btn-sm{padding:6px 10px; font-size:.76rem; border-radius:8px;}
+  .btn svg{width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2;}
+
+  .ledger-wrap{overflow-x:auto; border-radius:12px; border:1px solid var(--line);}
+  table.ledger{width:100%; border-collapse:collapse; min-width:600px; font-size:.85rem;}
+  table.ledger th{
+    text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
+    font-weight:600; padding:10px 12px; background:var(--card-2); border-bottom:1px solid var(--line);
+    position:sticky; top:0; font-family:system-ui, sans-serif;
+  }
+  table.ledger td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  table.ledger tr:last-child td{border-bottom:none;}
+  table.ledger td.num{text-align:right; font-family:ui-monospace,monospace; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  table.ledger td.total{font-weight:600; color:var(--accent-strong);}
+  table.ledger .acte-detail{font-size:.72rem; color:var(--muted); margin-top:2px;}
+  .pill{display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px; font-size:.68rem; font-weight:600; background:var(--accent-soft); color:var(--accent-strong); font-family:system-ui, sans-serif; margin:1px 3px 1px 0;}
+  .pill.demo{background:var(--warn-fill); color:#3a2a04;}
+  .row-del{
+    width:26px; height:26px; border-radius:7px; border:1px solid var(--line-strong); background:var(--card-2);
+    color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .row-del:hover{color:var(--critical); border-color:var(--critical);}
+  .row-del svg{width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2;}
+  .empty-ledger{padding:26px 14px; text-align:center; color:var(--muted); font-size:.85rem;}
+  tfoot td{padding:11px 12px; font-weight:600; border-top:2px solid var(--line-strong); background:var(--card-2);}
+
+  .demo-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    background:color-mix(in srgb, var(--warn-fill) 22%, var(--card)); border:1px solid color-mix(in srgb, var(--warn-fill) 55%, transparent);
+    border-radius:10px; padding:9px 12px; font-size:.8rem; color:var(--warn-ink); margin-bottom:12px;
+  }
+  .demo-banner button{font:inherit; font-size:.78rem; font-weight:600; border:none; background:none; color:var(--warn-ink); text-decoration:underline; cursor:pointer; padding:0;}
+
+  .week-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+  .week-tile{
+    background:var(--card-2); border:1px solid var(--line); border-radius:10px; padding:8px 4px;
+    display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; text-align:center;
+    min-width:0;
+  }
+  .week-tile:hover{border-color:var(--accent);}
+  .week-tile.selected{background:var(--accent-soft); border-color:var(--accent);}
+  .week-tile .wt-day{font-size:.64rem; text-transform:uppercase; letter-spacing:.03em; color:var(--muted); font-family:system-ui, sans-serif;}
+  .week-tile .wt-date{font-size:.74rem; color:var(--ink-soft);}
+  .week-tile .wt-total{font-size:.74rem; font-weight:600; color:var(--ink); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+  @media (max-width:480px){ .week-grid{grid-template-columns:repeat(4,1fr);} }
+
+  .sector-list{display:flex; flex-direction:column; gap:6px;}
+  .sector-row{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background:var(--card-2); border:1px solid var(--line); border-radius:9px; padding:7px 10px; font-size:.83rem;
+  }
+  .sector-row .sr-name{font-weight:600; color:var(--ink);}
+  .sector-row .sr-meta{color:var(--muted); font-size:.76rem;}
+  .sector-empty{font-size:.8rem; color:var(--muted); padding:4px 2px;}
+  .sector-add-row{display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; align-items:flex-end;}
+  .sector-add-row .field{flex:1; min-width:120px;}
+  .sector-add-row .field.km{max-width:100px;}
+  .sector-add-row .field.zone{max-width:130px;}
+
+  .chart-head{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:4px;}
+  .chart-head .month-total{font-family:ui-monospace,monospace; font-weight:600; color:var(--accent-strong); font-size:1rem;}
+  .chart-svg-wrap{overflow-x:auto;}
+  svg.chart{display:block; overflow:visible;}
+  .axis-label{font-family:ui-monospace,monospace; font-size:9px; fill:var(--muted);}
+  .tooltip-chart{
+    position:absolute; pointer-events:none; background:var(--ink); color:var(--paper); font-size:.72rem;
+    padding:5px 8px; border-radius:6px; transform:translate(-50%,-115%); white-space:nowrap; font-family:ui-monospace,monospace;
+    opacity:0; transition:opacity .1s;
+  }
+  .chart-rel{position:relative;}
+
+  details.backup summary{cursor:pointer; font-size:.85rem; font-weight:600; color:var(--ink-soft); list-style:none; display:flex; align-items:center; gap:6px;}
+  details.backup summary::-webkit-details-marker{display:none;}
+  details.backup summary svg{width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; transition:transform .15s;}
+  details.backup[open] summary svg{transform:rotate(90deg);}
+  details.backup textarea{
+    width:100%; margin-top:10px; font-family:ui-monospace,monospace; font-size:.72rem; padding:10px;
+    border-radius:9px; border:1px solid var(--line-strong); background:var(--card-2); color:var(--ink-soft);
+    min-height:80px; resize:vertical;
+  }
+  .backup-actions{display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; align-items:center;}
+  .copy-status{font-size:.76rem; color:var(--good); margin-left:4px;}
+  .file-btn{position:relative; overflow:hidden;}
+  .file-btn input[type="file"]{position:absolute; inset:0; opacity:0; cursor:pointer;}
+
+  footer.page{margin-top:6px; text-align:center; font-size:.74rem; color:var(--muted);}
+
+  .modal-veil{
+    position:fixed; inset:0; background:rgba(20,19,16,.45); display:flex; align-items:flex-end; justify-content:center;
+    z-index:40; padding:0;
+  }
+  @media (min-width:560px){ .modal-veil{align-items:center; padding:20px;} }
+  .modal{
+    background:var(--paper); border:1px solid var(--line); width:100%; max-width:520px; max-height:88vh; overflow-y:auto;
+    border-radius:18px 18px 0 0; padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));
+    box-shadow:0 -6px 24px var(--shadow);
+  }
+  @media (min-width:560px){ .modal{border-radius:18px;} }
+  .modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .modal-head h2{font-size:1.1rem;}
+  .modal-close{background:none; border:none; color:var(--muted); cursor:pointer; padding:4px;}
+  .modal-close svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;}
+  .settings-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .settings-grid .field.full{grid-column:1/-1;}
+  .settings-note{font-size:.76rem; color:var(--muted); margin:12px 0 0; line-height:1.5;}
+
+  @media (max-width:480px){
+    .stat-row{grid-template-columns:1fr 1fr;}
+    .stat-tile.hero{grid-column:1/-1;}
+    .field-grid{grid-template-columns:1fr;}
+    .settings-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand-mark">
+      <div class="glyph">
+        <svg viewBox="0 0 24 24"><path d="M6 3v18M6 3h10a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6"/><path d="M9 8h5M9 12h5M9 16h3"/></svg>
+      </div>
+      <div class="brand">
+        <h1>Carnet de Tournée</h1>
+        <p>Cotation guidée &amp; chiffre d'affaires, jour par jour</p>
+      </div>
+    </div>
+    <button class="icon-btn" id="openSettings" aria-label="Réglages des tarifs" title="Réglages des tarifs">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 8.96 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.7 8.96a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9.1A1.7 1.7 0 0 0 10.14 3H3.12"/></svg>
+    </button>
+  </div>
+
+  <div class="security-note">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+    <div>
+      <strong>Fichier local, sans serveur.</strong>
+      <ul>
+        <li>Aucune connexion internet requise, aucune donnée envoyée où que ce soit.</li>
+        <li>Tout reste dans ce navigateur, sur cet appareil — utilisez des initiales pour les patients.</li>
+        <li>Faites une sauvegarde (.json) de temps en temps, en bas de page.</li>
+      </ul>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="day-head">
+      <div class="date-field">
+        <div class="day-nav">
+          <button id="prevDay" aria-label="Jour précédent"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button id="nextDay" aria-label="Jour suivant"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+        </div>
+        <input type="date" id="dayPicker">
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-tile hero">
+        <span class="label">CA du jour (brut)</span>
+        <span class="value num" id="dayTotal">0,00 €</span>
+        <span class="label" style="margin-top:2px;">Net après rétrocession — <span class="num" id="dayNet">0,00 €</span></span>
+      </div>
+      <div class="stat-tile">
+        <span class="label">Visites</span>
+        <span class="value num" id="dayVisits">0</span>
+      </div>
+      <div class="stat-tile">
+        <span class="label">Km parcourus</span>
+        <span class="value num" id="dayKm">0</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="day-head">
+      <h2>Semaine — <span id="weekLabel"></span></h2>
+      <div class="day-nav">
+        <button id="prevWeek" aria-label="Semaine précédente"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button id="nextWeek" aria-label="Semaine suivante"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+    </div>
+    <p class="card-sub" style="margin-top:10px;">CA brut par jour, cliquez un jour pour l'ouvrir ci-dessus.</p>
+    <div class="week-grid" id="weekGrid"></div>
+    <div class="stat-row" style="grid-template-columns:1fr 1fr;">
+      <div class="stat-tile">
+        <span class="label">Total semaine (brut)</span>
+        <span class="value num" id="weekTotal">0,00 €</span>
+      </div>
+      <div class="stat-tile">
+        <span class="label">Net après rétrocession</span>
+        <span class="value num" id="weekNet">0,00 €</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Ajouter une visite</h2>
+    <p class="card-sub">Cochez les actes réalisés : la cotation (dégressivité, majorations) se calcule toute seule, et se fige à l'enregistrement — un changement de tarif plus tard ne modifiera jamais cette visite.</p>
+    <form id="visitForm">
+      <div class="field-grid">
+        <div class="field">
+          <label for="fPrenom">Prénom du patient</label>
+          <input type="text" id="fPrenom" placeholder="ex. Julie" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="fNom">Nom du patient</label>
+          <input type="text" id="fNom" placeholder="ex. Dupont" autocomplete="off">
+        </div>
+      </div>
+      <p class="card-sub" style="margin:6px 0 0;">Seules les initiales sont enregistrées : <strong id="initialsPreview">—</strong>. Le prénom et le nom saisis ci-dessus ne sont jamais sauvegardés.</p>
+
+      <div class="field full" style="margin-top:10px;">
+        <label>Type de prise en charge</label>
+        <div class="type-toggle" id="typeToggle">
+          <button type="button" data-type="AMI" aria-pressed="true">Soins techniques</button>
+          <button type="button" data-type="BSI" aria-pressed="false">Patient en forfait (BSI)</button>
+          <button type="button" data-type="LIBRE" aria-pressed="false">Montant libre</button>
+        </div>
+      </div>
+
+      <div id="typeFields"></div>
+
+      <div class="subhead">
+        <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+        Majorations
+      </div>
+      <div class="field-grid" style="margin-bottom:8px;">
+        <div class="field">
+          <label for="fHeure">Heure du soin (optionnel)</label>
+          <input type="time" id="fHeure">
+        </div>
+        <div class="field">
+          <label for="fSecteurSel">Secteur</label>
+          <select id="fSecteurSel"></select>
+        </div>
+      </div>
+      <div class="field-grid" id="manualKmRow" style="margin-top:2px; margin-bottom:8px;">
+        <div class="field">
+          <label for="fKm">Km parcourus (aller-retour)</label>
+          <input type="number" id="fKm" value="0" min="0" step="0.5">
+        </div>
+        <div class="field">
+          <label for="fSecteurType">Zone</label>
+          <select id="fSecteurType">
+            <option value="plaine">Plaine</option>
+            <option value="montagne">Montagne</option>
+          </select>
+        </div>
+      </div>
+      <p class="card-sub" id="autoKmNote" style="margin:0 0 8px;" hidden></p>
+      <div class="majo-grid">
+        <div class="majo-item" id="mauItem">
+          <input type="checkbox" id="mMau">
+          <div class="majo-text">
+            <span class="majo-title">MAU — acte unique<span class="badge-auto" id="mauAuto" hidden>suggéré</span></span>
+            <span class="majo-hint" id="mauHint">Un seul acte ≤ AMI 1,5 dans la visite — non cumulable avec MCI ni un forfait</span>
+          </div>
+          <span class="majo-amt num" id="mauAmt">+1,35 €</span>
+        </div>
+        <div class="majo-item">
+          <input type="checkbox" id="mMci">
+          <div class="majo-text">
+            <span class="majo-title">MCI — coordination infirmière</span>
+            <span class="majo-hint">Pansement lourd nécessitant une coordination — non cumulable avec MAU</span>
+          </div>
+          <span class="majo-amt num" id="mciAmt">+5,00 €</span>
+        </div>
+        <div class="majo-item">
+          <input type="checkbox" id="mMie">
+          <div class="majo-text">
+            <span class="majo-title">MIE — jeune enfant</span>
+            <span class="majo-hint">Patient de moins de 7 ans</span>
+          </div>
+          <span class="majo-amt num" id="mieAmt">+3,15 €</span>
+        </div>
+        <div class="majo-item" style="flex-direction:column; align-items:stretch;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="majo-title" style="flex:1;">Majoration de nuit<span class="badge-auto" id="nuitAuto" hidden>suggéré</span></span>
+          </div>
+          <div class="nuit-group" style="margin-top:4px;">
+            <label class="nuit-option"><input type="radio" name="mNuit" value="none" checked> Aucune</label>
+            <label class="nuit-option"><input type="radio" name="mNuit" value="soir"> 20h–23h ou 5h–8h — <span class="num">+9,15 €</span></label>
+            <label class="nuit-option"><input type="radio" name="mNuit" value="profonde"> 23h–5h — <span class="num">+18,30 €</span></label>
+          </div>
+        </div>
+        <div class="majo-item">
+          <input type="checkbox" id="mDimanche">
+          <div class="majo-text">
+            <span class="majo-title">Dimanche / jour férié<span class="badge-auto" id="dimancheAuto" hidden>suggéré</span></span>
+            <span class="majo-hint">Détecté automatiquement selon la date de la visite</span>
+          </div>
+          <span class="majo-amt num" id="dimancheAmt">+8,50 €</span>
+        </div>
+      </div>
+
+      <div class="check-row" style="margin-top:6px;">
+        <input type="checkbox" id="fIfd">
+        <label for="fIfd">Ajouter l'IFD (indemnité de déplacement)</label>
+      </div>
+
+      <div class="breakdown" id="previewBreakdown"></div>
+
+      <p class="disclaimer">Cotations indicatives pour les actes et majorations les plus courants (NGAP, hors cas particuliers et règles de cumul spécifiques). Cet outil aide au calcul, il ne remplace pas votre jugement professionnel ni un logiciel de télétransmission agréé.</p>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Ajouter à la tournée — <span class="num" id="livePreview">0,00 €</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Feuille du jour</h2>
+    <p class="card-sub" id="ledgerDateLabel"></p>
+    <div id="demoBanner" class="demo-banner" hidden>
+      <span>Ces lignes sont des exemples pour montrer le fonctionnement de l'outil.</span>
+      <button type="button" id="clearDemo">Vider les exemples</button>
+    </div>
+    <div class="ledger-wrap">
+      <table class="ledger">
+        <thead>
+          <tr>
+            <th>Patient</th><th>Détail</th><th class="num">IK</th><th class="num">Total</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="ledgerBody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">Total du jour (brut)</td>
+            <td class="num" id="ledgerFooterTotal">0,00 €</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td colspan="3">Net après rétrocession</td>
+            <td class="num" id="ledgerFooterNet">0,00 €</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="chart-head">
+      <h2>CA du mois — <span id="monthLabel"></span></h2>
+      <span class="month-total" id="monthTotal">0,00 €</span>
+    </div>
+    <div class="type-toggle" id="chartModeToggle" style="max-width:220px; margin:8px 0;">
+      <button type="button" data-mode="day" aria-pressed="true">Par jour</button>
+      <button type="button" data-mode="week" aria-pressed="false">Par semaine</button>
+    </div>
+    <p class="card-sub">Survolez une barre pour voir le détail.</p>
+    <div class="chart-rel">
+      <div class="chart-svg-wrap"><svg class="chart" id="monthChart" height="150"></svg></div>
+      <div class="tooltip-chart" id="chartTooltip"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <details class="backup" open>
+      <summary><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg> Sauvegarde des données</summary>
+      <p class="card-sub" style="margin-top:8px;">Téléchargez un fichier de sauvegarde régulièrement. Le fichier reste sur votre disque, sous votre contrôle.</p>
+      <div class="backup-actions">
+        <button type="button" class="btn btn-primary" id="downloadBackup">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
+          Télécharger la sauvegarde (.json)
+        </button>
+        <label class="btn btn-ghost file-btn">
+          Restaurer depuis un fichier
+          <input type="file" id="restoreFile" accept="application/json,.json">
+        </label>
+      </div>
+      <p class="card-sub" style="margin-top:16px;">Vous pouvez aussi copier-coller le texte brut :</p>
+      <textarea id="exportArea" readonly></textarea>
+      <div class="backup-actions">
+        <button type="button" class="btn btn-ghost" id="copyExport">Copier le texte</button>
+        <span class="copy-status" id="copyStatus" hidden>Copié ✓</span>
+      </div>
+      <textarea id="importArea" placeholder="…ou collez ici le contenu d'une sauvegarde texte" style="margin-top:8px;"></textarea>
+      <div class="backup-actions">
+        <button type="button" class="btn btn-ghost" id="doImport">Importer ce texte (remplace les données actuelles)</button>
+      </div>
+    </details>
+  </section>
+
+  <datalist id="coefPresets">
+    <option value="0.5"><option value="1"><option value="1.2"><option value="1.5">
+    <option value="2"><option value="2.25"><option value="3"><option value="4">
+    <option value="5"><option value="5.1"><option value="5.8">
+  </datalist>
+
+  <footer class="page">V3 — outil local, sans compte, sans serveur, sans connexion.</footer>
+</div>
+
+<div class="modal-veil" id="settingsVeil" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-head">
+      <h2 id="settingsTitle">Tarifs &amp; réglages</h2>
+      <button class="modal-close" id="closeSettings" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+
+    <p class="settings-note" style="margin-top:0;">Ces tarifs s'appliquent aux <strong>prochaines</strong> visites saisies. Les visites déjà enregistrées gardent le montant calculé au moment de leur création — elles ne changent jamais rétroactivement.</p>
+
+    <div class="subhead">Actes</div>
+    <div class="settings-grid">
+      <div class="field"><label for="sAmi">Valeur AMI (€ / point)</label><input type="number" id="sAmi" step="0.01" min="0"></div>
+      <div class="field"><label for="sBsa">Forfait BSA (€/j)</label><input type="number" id="sBsa" step="0.01" min="0"></div>
+      <div class="field"><label for="sBsb">Forfait BSB (€/j)</label><input type="number" id="sBsb" step="0.01" min="0"></div>
+      <div class="field"><label for="sBsc">Forfait BSC (€/j)</label><input type="number" id="sBsc" step="0.01" min="0"></div>
+    </div>
+
+    <div class="subhead">Déplacement</div>
+    <div class="settings-grid">
+      <div class="field"><label for="sIfd">IFD par passage (€)</label><input type="number" id="sIfd" step="0.01" min="0"></div>
+      <div class="field"><label for="sIkPlaine">IK plaine (€/km)</label><input type="number" id="sIkPlaine" step="0.01" min="0"></div>
+      <div class="field"><label for="sIkMontagne">IK montagne (€/km)</label><input type="number" id="sIkMontagne" step="0.01" min="0"></div>
+      <div class="field"><label for="sAbattementPlaine">Abattement IK plaine (km)</label><input type="number" id="sAbattementPlaine" step="0.5" min="0"></div>
+      <div class="field"><label for="sAbattementMontagne">Abattement IK montagne (km)</label><input type="number" id="sAbattementMontagne" step="0.5" min="0"></div>
+    </div>
+    <p class="settings-note" style="margin-top:6px;">Seuils officiels : l'IK ne s'applique qu'au-delà de 2 km en plaine, mais 1 km en montagne (ameli.fr).</p>
+
+    <div class="subhead">Secteurs (raccourcis kilométrage)</div>
+    <p class="settings-note" style="margin:0 0 8px;">Enregistrez vos lieux habituels avec leur distance : à la saisie d'une visite, il suffira de choisir le secteur dans une liste, sans ressaisir le kilométrage à chaque fois. Ajout/suppression pris en compte immédiatement.</p>
+    <div class="sector-list" id="secteursList"></div>
+    <div class="sector-add-row">
+      <div class="field"><label for="secteurNomInput">Nom du secteur</label><input type="text" id="secteurNomInput" placeholder="ex. Paris"></div>
+      <div class="field km"><label for="secteurKmInput">Km (a/r)</label><input type="number" id="secteurKmInput" min="0" step="0.5"></div>
+      <div class="field zone"><label for="secteurTypeInput">Zone</label>
+        <select id="secteurTypeInput"><option value="plaine">Plaine</option><option value="montagne">Montagne</option></select>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" id="secteurAdd">Ajouter</button>
+    </div>
+
+    <div class="subhead">Majorations</div>
+    <div class="settings-grid">
+      <div class="field"><label for="sMau">MAU — acte unique (€)</label><input type="number" id="sMau" step="0.01" min="0"></div>
+      <div class="field"><label for="sMci">MCI — coordination (€)</label><input type="number" id="sMci" step="0.01" min="0"></div>
+      <div class="field"><label for="sMie">MIE — jeune enfant (€)</label><input type="number" id="sMie" step="0.01" min="0"></div>
+      <div class="field"><label for="sDimanche">Dimanche / férié (€)</label><input type="number" id="sDimanche" step="0.01" min="0"></div>
+      <div class="field"><label for="sNuit1">Nuit 20-23h / 5-8h (€)</label><input type="number" id="sNuit1" step="0.01" min="0"></div>
+      <div class="field"><label for="sNuit2">Nuit 23h-5h (€)</label><input type="number" id="sNuit2" step="0.01" min="0"></div>
+    </div>
+
+    <div class="subhead">Rétrocession</div>
+    <div class="settings-grid">
+      <div class="field"><label for="sRetro">Rétrocession versée au cabinet (%)</label><input type="number" id="sRetro" step="0.1" min="0" max="100"></div>
+    </div>
+    <p class="settings-note" style="margin-top:6px;">Base de calcul — certains contrats excluent les indemnités de déplacement de la rétrocession :</p>
+    <div class="check-row">
+      <input type="checkbox" id="sRetroIfd">
+      <label for="sRetroIfd">Inclure l'IFD dans la base de rétrocession</label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="sRetroIk">
+      <label for="sRetroIk">Inclure les IK dans la base de rétrocession</label>
+    </div>
+    <p class="settings-note" style="margin-top:6px;">Le « net » affiché correspond à votre CA moins ce pourcentage, appliqué uniquement aux éléments cochés ci-dessus (les actes et majorations sont toujours concernés) — ajustez selon votre contrat de remplacement.</p>
+
+    <p class="settings-note">Ces tarifs évoluent régulièrement (ex. l'AMI passe de 3,15 € à 3,35 € en novembre 2026 avec l'avenant 11). Ajustez-les ici dès qu'une revalorisation entre en vigueur.</p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" id="saveSettings">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORE_KEY = "carnet-tournee";   // clé stable : les futures évolutions passent par schemaVersion + migration, jamais par un renommage de clé
+  var SCHEMA_VERSION = 3;
+
+  var todayISO = function(d){
+    d = d || new Date();
+    var tz = d.getTimezoneOffset() * 60000;
+    return new Date(d - tz).toISOString().slice(0,10);
+  };
+
+  /* ---------- acts catalog ---------- */
+  var ACTS_CATALOG = [
+    {id:"inj",        label:"Injection (IM / SC / insuline)",     coef:1},
+    {id:"prlv",       label:"Prélèvement veineux (prise de sang)", coef:1.5},
+    {id:"pans_courant",label:"Pansement courant / simple",        coef:2},
+    {id:"pans_ulcere", label:"Pansement plaie / ulcère",          coef:2.02},
+    {id:"sonde_retrait",label:"Retrait sonde urinaire",           coef:2},
+    {id:"pans_stomie", label:"Pansement de stomie",               coef:3},
+    {id:"sondage",     label:"Cathétérisme / sondage",            coef:3},
+    {id:"ablation",    label:"Ablation fils / agrafes (>10)",     coef:4},
+    {id:"pans_lourd",  label:"Pansement lourd et complexe",       coef:4},
+    {id:"perf_courte", label:"Perfusion courte (≤1h)",            coef:9},
+    {id:"perf_longue", label:"Perfusion longue (>1h)",            coef:14},
+    {id:"perf_surv_h", label:"Surveillance perfusion (par heure)",coef:6},
+    {id:"perf_surv_j", label:"Surveillance perfusion (forfait/j)",coef:4},
+    {id:"perf_retrait",label:"Retrait perfusion avec pansement",  coef:5}
+  ];
+
+  /* ---------- French public holidays (Gauss/Meeus algorithm) ---------- */
+  function easterDate(year){
+    var a=year%19, b=Math.floor(year/100), c=year%100, d=Math.floor(b/4), e=b%4,
+        f=Math.floor((b+8)/25), g=Math.floor((b-f+1)/3), h=(19*a+b-d-g+15)%30,
+        i=Math.floor(c/4), k=c%4, l=(32+2*e+2*i-h-k)%7, m=Math.floor((a+11*h+22*l)/451),
+        month=Math.floor((h+l-7*m+114)/31), day=((h+l-7*m+114)%31)+1;
+    return new Date(year, month-1, day);
+  }
+  var holidayCache = {};
+  function frenchHolidaysISO(year){
+    if(holidayCache[year]) return holidayCache[year];
+    var easter = easterDate(year);
+    var plus = function(base, n){ var d=new Date(base); d.setDate(d.getDate()+n); return d; };
+    var dates = [
+      new Date(year,0,1), new Date(year,4,1), new Date(year,4,8),
+      new Date(year,6,14), new Date(year,7,15), new Date(year,10,1),
+      new Date(year,10,11), new Date(year,11,25),
+      plus(easter,1), plus(easter,39), plus(easter,50)
+    ];
+    var iso = dates.map(function(d){ return todayISO(d); });
+    holidayCache[year] = iso;
+    return iso;
+  }
+  function isSundayOrHoliday(dateISO){
+    var d = new Date(dateISO + "T00:00:00");
+    if(d.getDay() === 0) return true;
+    return frenchHolidaysISO(d.getFullYear()).indexOf(dateISO) !== -1;
+  }
+
+  var DEFAULT_SETTINGS = {
+    ami: 3.15, ifd: 2.75, bsa: 13.00, bsb: 18.20, bsc: 28.70,
+    ikPlaine: 0.35, ikMontagne: 0.50, abattementPlaine: 2, abattementMontagne: 1,
+    mau: 1.35, mci: 5.00, mie: 3.15, nuit1: 9.15, nuit2: 18.30, dimanche: 8.50,
+    retro: 10, retroIncludesIfd: true, retroIncludesIk: true, secteurs: []
+  };
+  /** Toujours retourner une COPIE des settings, avec secteurs comme tableau propre (jamais une référence partagée
+   * avec DEFAULT_SETTINGS.secteurs, pour éviter qu'une modification de la liste d'un état ne pollue le gabarit par défaut). */
+  function withDefaults(overrides){
+    var s = Object.assign({}, DEFAULT_SETTINGS, overrides || {});
+    s.secteurs = ((overrides && overrides.secteurs) || []).slice();
+    return s;
+  }
+
+  /* ---------- semaine (lundi -> dimanche) ---------- */
+  function mondayOf(iso){
+    var d = new Date(iso + "T00:00:00");
+    var day = d.getDay(); // 0 = dimanche
+    var diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    return todayISO(d);
+  }
+
+  /* ---------- patient initials: 1ère lettre du prénom + 3 premières lettres du nom (jamais le prénom/nom complet n'est enregistré) ---------- */
+  function deriveInitials(prenom, nom){
+    var p = (prenom || "").trim();
+    var n = (nom || "").trim();
+    var i1 = p ? p.charAt(0).toUpperCase() : "";
+    var i2 = n ? n.slice(0,3).toUpperCase() : "";
+    return (i1 + i2).trim();
+  }
+
+  /* ---------- pure calculation (used for live preview AND to freeze a visit at creation) ---------- */
+  /* Dégressivité : 1er acte facturé à 100%, 2e acte à 50%, 3e acte et suivants à 0% (non facturés). */
+  function degressiveTotal(acts, ami){
+    if(!acts || !acts.length) return {amount:0, detail:[]};
+    var sorted = acts.slice().sort(function(a,b){ return b.coef - a.coef; });
+    var amount = 0, detail = [];
+    sorted.forEach(function(a, idx){
+      var pct = idx === 0 ? 1 : (idx === 1 ? 0.5 : 0);
+      var amt = a.coef * ami * pct;
+      amount += amt;
+      detail.push({label:a.label, coef:a.coef, pct:pct, amt:amt, notBilled: pct === 0});
+    });
+    return {amount:amount, detail:detail};
+  }
+  function majorationsTotal(majo, settings){
+    var amount = 0, detail = [];
+    if(majo.mau){ amount += settings.mau; detail.push({label:"MAU", amt:settings.mau}); }
+    if(majo.mci){ amount += settings.mci; detail.push({label:"MCI", amt:settings.mci}); }
+    if(majo.mie){ amount += settings.mie; detail.push({label:"MIE", amt:settings.mie}); }
+    if(majo.nuit === "soir"){ amount += settings.nuit1; detail.push({label:"Nuit (20-23h/5-8h)", amt:settings.nuit1}); }
+    else if(majo.nuit === "profonde"){ amount += settings.nuit2; detail.push({label:"Nuit (23h-5h)", amt:settings.nuit2}); }
+    if(majo.dimanche){ amount += settings.dimanche; detail.push({label:"Dimanche/férié", amt:settings.dimanche}); }
+    return {amount:amount, detail:detail};
+  }
+  function computeLine(v, settings){
+    var base = 0, baseDetail = [];
+    if(v.type === "AMI"){
+      var deg = degressiveTotal(v.acts, settings.ami);
+      base = deg.amount; baseDetail = deg.detail;
+    } else if(v.type === "BSI"){
+      var forfait = settings[v.bsi] || 0;
+      base = forfait; baseDetail = [{label:(v.bsi||"bsa").toUpperCase()+" (forfait)", amt:forfait}];
+      // Même dégressivité que les actes AMI : le forfait BSI n'entre pas dans le calcul, donc le 1er acte technique
+      // (AMX) en plus est facturé à 50%, les suivants à 0% (non facturés).
+      var sortedAmx = (v.amxActs||[]).slice().sort(function(a,b){ return b.coef - a.coef; });
+      sortedAmx.forEach(function(a, idx){
+        var pct = idx === 0 ? 0.5 : 0;
+        var amt = a.coef * settings.ami * pct;
+        base += amt;
+        baseDetail.push({label:"AMX "+a.label, coef:a.coef, amt:amt, pct:pct, notBilled: pct === 0});
+      });
+    } else {
+      base = Number(v.montant) || 0;
+      baseDetail = [{label:"Montant libre", amt:base}];
+    }
+    var majo = majorationsTotal(v.majo || {}, settings);
+    var ifdAmt = v.ifd ? settings.ifd : 0;
+    // Abattement kilométrique différencié : l'IK ne s'applique qu'au-delà de 2 km en plaine, 1 km en montagne (ameli.fr).
+    var isMontagne = v.secteur === "montagne";
+    var kmRate = isMontagne ? settings.ikMontagne : settings.ikPlaine;
+    var abat = isMontagne ? settings.abattementMontagne : settings.abattementPlaine;
+    var kmNet = Math.max(0, (Number(v.km)||0) - abat);
+    var ikAmt = kmNet * kmRate;
+    return {
+      base:base, baseDetail:baseDetail, majo:majo.amount, majoDetail:majo.detail,
+      ifd:ifdAmt, ik:ikAmt, total: base + majo.amount + ifdAmt + ikAmt
+    };
+  }
+  /** Montant net après rétrocession pour une visite : le taux ne s'applique qu'aux éléments
+   * inclus dans la base (actes + majorations toujours concernés ; IFD/IK selon les réglages). */
+  function visitNet(v, settings){
+    var c = v.computed;
+    var retroBase = c.base + c.majo;
+    if(settings.retroIncludesIfd !== false) retroBase += c.ifd;
+    if(settings.retroIncludesIk !== false) retroBase += c.ik;
+    return c.total - retroBase * ((settings.retro||0)/100);
+  }
+  /** Freezes a visit's computed result + the tariffs used, called once at creation. Never called again afterwards. */
+  function freezeVisit(v, settings){
+    var t = computeLine(v, settings);
+    v.tariffsSnapshot = Object.assign({}, settings);
+    v.computed = {base:t.base, majo:t.majo, ifd:t.ifd, ik:t.ik, total:t.total};
+    return v;
+  }
+
+  /* ---------- state: flat visits[] + settings, schema-versioned ---------- */
+  var DEMO_DAY = todayISO();
+  function buildDemoVisits(settings){
+    var v1 = {id:"demo1", date:DEMO_DAY, patient:"Ex. — Mme R.", lieu:"Centre-ville", type:"AMI",
+      acts:[{label:"Pansement plaie / ulcère", coef:2.02},{label:"Injection (IM / SC / insuline)", coef:1}],
+      majo:{mau:false, mci:false, mie:false, nuit:"none", dimanche:false},
+      ifd:true, km:6, secteur:"plaine", demo:true};
+    var v2 = {id:"demo2", date:DEMO_DAY, patient:"Ex. — M. B.", lieu:"Quartier gare", type:"BSI", bsi:"bsb", amxActs:[],
+      majo:{mau:false, mci:false, mie:false, nuit:"none", dimanche:false},
+      ifd:true, km:9, secteur:"plaine", demo:true};
+    return [freezeVisit(v1, settings), freezeVisit(v2, settings)];
+  }
+
+  /** Migrates the old nested {days:{date:{visits:[]}}} shape (V1/V2) into the flat, frozen V3 shape. Nothing is discarded. */
+  function migrateFromLegacy(old){
+    var settings = withDefaults(old.settings || {});
+    var visits = [];
+    if(old.days){
+      Object.keys(old.days).forEach(function(dateKey){
+        (old.days[dateKey].visits || []).forEach(function(v){
+          v.date = dateKey;
+          // No historical tariff record existed before V3: best-effort freeze using the settings found in the old save.
+          freezeVisit(v, settings);
+          visits.push(v);
+        });
+      });
+    }
+    return {schemaVersion: SCHEMA_VERSION, settings: settings, visits: visits};
+  }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed.visits && parsed.schemaVersion === SCHEMA_VERSION){
+          parsed.settings = withDefaults(parsed.settings || {});
+          parsed.visits = parsed.visits || [];
+          return parsed;
+        }
+        // Older shape found (or missing version) — migrate in place, nothing lost.
+        var migrated = migrateFromLegacy(parsed);
+        return migrated;
+      }
+    }catch(e){ /* storage unavailable — fall through to fresh seeded state */ }
+    var settings = withDefaults();
+    return {schemaVersion: SCHEMA_VERSION, settings: settings, visits: buildDemoVisits(settings)};
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){ /* best effort */ }
+  }
+
+  var state = loadState();
+  saveState(); // persist any migration immediately
+  var currentDate = todayISO();
+
+  var fmtEUR = function(v){
+    return (Math.round(v*100)/100).toLocaleString("fr-FR", {minimumFractionDigits:2, maximumFractionDigits:2}) + " €";
+  };
+  var uid = function(){ return "v" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); };
+
+  function actLabel(v){ return v; } // (kept for clarity where referenced)
+
+  /* ---------- settings modal ---------- */
+  var settingsVeil = document.getElementById("settingsVeil");
+  function openSettingsModal(){
+    var s = state.settings;
+    ["ami","ifd","bsa","bsb","bsc","ikPlaine","ikMontagne","abattementPlaine","abattementMontagne","mau","mci","mie","dimanche","retro"].forEach(function(k){
+      var el = document.getElementById("s"+k.charAt(0).toUpperCase()+k.slice(1));
+      if(el) el.value = s[k];
+    });
+    document.getElementById("sNuit1").value = s.nuit1;
+    document.getElementById("sNuit2").value = s.nuit2;
+    document.getElementById("sRetroIfd").checked = s.retroIncludesIfd !== false;
+    document.getElementById("sRetroIk").checked = s.retroIncludesIk !== false;
+    renderSecteursList();
+    settingsVeil.hidden = false;
+  }
+  document.getElementById("openSettings").addEventListener("click", openSettingsModal);
+  document.getElementById("closeSettings").addEventListener("click", function(){ settingsVeil.hidden = true; });
+  settingsVeil.addEventListener("click", function(e){ if(e.target === settingsVeil) settingsVeil.hidden = true; });
+  document.getElementById("saveSettings").addEventListener("click", function(){
+    function num(id){ return parseFloat(document.getElementById(id).value) || 0; }
+    // Only affects state.settings — the "current" tariffs used for the live preview and for the NEXT visits saved.
+    // Every already-saved visit keeps its own frozen v.computed / v.tariffsSnapshot untouched.
+    // Les secteurs sont gérés (ajout/suppression) directement dans leur propre liste, en dehors de ce bouton —
+    // on conserve donc la liste actuelle plutôt que de la remplacer par un tableau vide.
+    var keptSecteurs = (state.settings.secteurs || []).slice();
+    state.settings = {
+      ami:num("sAmi"), ifd:num("sIfd"), bsa:num("sBsa"), bsb:num("sBsb"), bsc:num("sBsc"),
+      ikPlaine:num("sIkPlaine"), ikMontagne:num("sIkMontagne"),
+      abattementPlaine:num("sAbattementPlaine"), abattementMontagne:num("sAbattementMontagne"),
+      mau:num("sMau"), mci:num("sMci"), mie:num("sMie"), nuit1:num("sNuit1"), nuit2:num("sNuit2"), dimanche:num("sDimanche"),
+      retro:num("sRetro"),
+      retroIncludesIfd: document.getElementById("sRetroIfd").checked,
+      retroIncludesIk: document.getElementById("sRetroIk").checked,
+      secteurs:keptSecteurs
+    };
+    saveState();
+    settingsVeil.hidden = true;
+    renderAll();
+  });
+
+  /* ---------- secteurs (raccourcis kilométrage) ---------- */
+  function renderSecteursList(){
+    var wrap = document.getElementById("secteursList");
+    var list = state.settings.secteurs || [];
+    if(!list.length){
+      wrap.innerHTML = '<p class="sector-empty">Aucun secteur enregistré pour l\'instant.</p>';
+      return;
+    }
+    wrap.innerHTML = list.map(function(s){
+      return '<div class="sector-row"><span><span class="sr-name">'+escapeHtml(s.nom)+'</span> <span class="sr-meta">— '+s.km+' km · '+(s.type==="montagne"?"montagne":"plaine")+'</span></span>' +
+        '<button type="button" class="row-del" data-secteur-del="'+s.id+'" aria-label="Supprimer ce secteur"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>';
+    }).join("");
+    Array.prototype.forEach.call(wrap.querySelectorAll("[data-secteur-del]"), function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-secteur-del");
+        state.settings.secteurs = (state.settings.secteurs || []).filter(function(s){ return s.id !== id; });
+        saveState();
+        renderSecteursList();
+        populateSecteurSelect();
+      });
+    });
+  }
+  document.getElementById("secteurAdd").addEventListener("click", function(){
+    var nomEl = document.getElementById("secteurNomInput");
+    var kmEl = document.getElementById("secteurKmInput");
+    var typeEl = document.getElementById("secteurTypeInput");
+    var nom = nomEl.value.trim();
+    var km = parseFloat(kmEl.value);
+    if(!nom || !(km >= 0)) return;
+    if(!state.settings.secteurs) state.settings.secteurs = [];
+    state.settings.secteurs.push({id: uid(), nom: nom, km: km, type: typeEl.value});
+    saveState();
+    nomEl.value = ""; kmEl.value = "";
+    renderSecteursList();
+    populateSecteurSelect();
+  });
+
+  /* ---------- entry form ---------- */
+  var currentType = "AMI";
+  var typeToggle = document.getElementById("typeToggle");
+  var typeFields = document.getElementById("typeFields");
+  var selectedActs = {};   // AMI mode: id -> {label,coef}
+  var selectedAmx = {};    // BSI mode extra techs: id -> {label,coef}
+  var customCounter = 0;
+
+  function actListHTML(prefix, selectedMap){
+    return '<div class="act-list" id="'+prefix+'List">' +
+      ACTS_CATALOG.map(function(a){
+        var checked = selectedMap[a.id] ? "checked" : "";
+        return '<label class="act-item"><span class="act-label"><input type="checkbox" data-prefix="'+prefix+'" data-id="'+a.id+'" data-label="'+a.label+'" data-coef="'+a.coef+'" '+checked+'>'+a.label+'</span><span class="act-code">AMI '+a.coef+'</span></label>';
+      }).join("") +
+      '</div>' +
+      '<div class="chip-row" id="'+prefix+'Chips"></div>' +
+      '<div class="custom-act-row">' +
+        '<div class="field"><label>Acte non listé</label><input type="text" id="'+prefix+'CustomLabel" placeholder="ex. Pansement particulier"></div>' +
+        '<div class="field coef"><label>Coef.</label><input type="number" id="'+prefix+'CustomCoef" min="0" step="0.05" list="coefPresets"></div>' +
+        '<button type="button" class="btn btn-ghost btn-sm" id="'+prefix+'CustomAdd">Ajouter</button>' +
+      '</div>';
+  }
+
+  function bindActList(prefix, selectedMap){
+    var list = document.getElementById(prefix+"List");
+    list.querySelectorAll("input[type=checkbox]").forEach(function(cb){
+      cb.addEventListener("change", function(){
+        var id = cb.getAttribute("data-id");
+        if(cb.checked){ selectedMap[id] = {label:cb.getAttribute("data-label"), coef:parseFloat(cb.getAttribute("data-coef"))}; }
+        else{ delete selectedMap[id]; }
+        renderChips(prefix, selectedMap);
+        updatePreview();
+      });
+    });
+    document.getElementById(prefix+"CustomAdd").addEventListener("click", function(){
+      var lbl = document.getElementById(prefix+"CustomLabel").value.trim();
+      var coef = parseFloat(document.getElementById(prefix+"CustomCoef").value);
+      if(!lbl || !coef) return;
+      var id = "custom"+(customCounter++);
+      selectedMap[id] = {label:lbl, coef:coef, custom:true};
+      document.getElementById(prefix+"CustomLabel").value = "";
+      document.getElementById(prefix+"CustomCoef").value = "";
+      renderChips(prefix, selectedMap);
+      updatePreview();
+    });
+    renderChips(prefix, selectedMap);
+  }
+
+  function renderChips(prefix, selectedMap){
+    var wrap = document.getElementById(prefix+"Chips");
+    var customEntries = Object.keys(selectedMap).filter(function(id){ return selectedMap[id].custom; });
+    wrap.innerHTML = customEntries.map(function(id){
+      var a = selectedMap[id];
+      return '<span class="chip">'+escapeHtml(a.label)+' — AMI '+a.coef+'<button type="button" data-remove="'+id+'" data-prefix="'+prefix+'"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>';
+    }).join("");
+    wrap.querySelectorAll("button[data-remove]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        delete selectedMap[btn.getAttribute("data-remove")];
+        renderChips(prefix, selectedMap);
+        updatePreview();
+      });
+    });
+  }
+
+  function renderTypeFields(){
+    if(currentType === "AMI"){
+      typeFields.innerHTML = '<div class="subhead">Actes réalisés à cette visite</div>' + actListHTML("act", selectedActs);
+      bindActList("act", selectedActs);
+    } else if(currentType === "BSI"){
+      typeFields.innerHTML =
+        '<div class="subhead">Forfait de dépendance</div>' +
+        '<div class="field-grid full" style="grid-template-columns:1fr 1fr 1fr;">' +
+          '<label class="check-row"><input type="radio" name="bsiChoice" value="bsa" checked>BSA — '+fmtEUR(state.settings.bsa)+'</label>' +
+          '<label class="check-row"><input type="radio" name="bsiChoice" value="bsb">BSB — '+fmtEUR(state.settings.bsb)+'</label>' +
+          '<label class="check-row"><input type="radio" name="bsiChoice" value="bsc">BSC — '+fmtEUR(state.settings.bsc)+'</label>' +
+        '</div>' +
+        '<div class="subhead">Actes techniques en plus (AMX, à 50%)</div>' +
+        actListHTML("amx", selectedAmx);
+      bindActList("amx", selectedAmx);
+      typeFields.querySelectorAll('input[name="bsiChoice"]').forEach(function(r){
+        r.addEventListener("change", updatePreview);
+      });
+    } else {
+      typeFields.innerHTML =
+        '<div class="field"><label for="fMontant">Montant (€)</label><input type="number" id="fMontant" value="0" min="0" step="0.01"></div>';
+      var mEl = document.getElementById("fMontant");
+      if(mEl) mEl.addEventListener("input", updatePreview);
+    }
+    updateMauSuggestion();
+    updatePreview();
+  }
+
+  Array.prototype.forEach.call(typeToggle.querySelectorAll("button"), function(btn){
+    btn.addEventListener("click", function(){
+      Array.prototype.forEach.call(typeToggle.querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed","false"); });
+      btn.setAttribute("aria-pressed","true");
+      currentType = btn.getAttribute("data-type");
+      renderTypeFields();
+    });
+  });
+
+  /* ---------- majoration auto-suggestions ---------- */
+  // MAU n'est jamais cumulable avec un forfait BSA/BSB/BSC (ni pertinente pour un montant libre) :
+  // on désactive la case à cocher en dehors du mode "Soins techniques" plutôt que de la laisser cochable à tort.
+  function updateMauSuggestion(){
+    var mauCb = document.getElementById("mMau");
+    var mauAuto = document.getElementById("mauAuto");
+    var mauItem = document.getElementById("mauItem");
+    if(currentType !== "AMI"){
+      mauAuto.hidden = true;
+      mauCb.checked = false;
+      mauCb.disabled = true;
+      mauItem.classList.add("is-disabled");
+      return;
+    }
+    mauCb.disabled = false;
+    mauItem.classList.remove("is-disabled");
+    var ids = Object.keys(selectedActs);
+    var eligible = ids.length === 1 && selectedActs[ids[0]].coef <= 1.5;
+    mauAuto.hidden = !eligible;
+    if(eligible) mauCb.checked = true;
+  }
+  // MAU et MCI ne sont jamais cumulables entre elles (règle NGAP) : cocher l'une décoche l'autre.
+  document.getElementById("mMau").addEventListener("change", function(){
+    if(this.checked) document.getElementById("mMci").checked = false;
+  });
+  document.getElementById("mMci").addEventListener("change", function(){
+    if(this.checked) document.getElementById("mMau").checked = false;
+  });
+
+  function updateDimancheSuggestion(){
+    var auto = isSundayOrHoliday(currentDate);
+    document.getElementById("dimancheAuto").hidden = !auto;
+    if(auto) document.getElementById("mDimanche").checked = true;
+  }
+
+  function updateNuitSuggestion(){
+    var t = document.getElementById("fHeure").value;
+    var auto = document.getElementById("nuitAuto");
+    if(!t){ auto.hidden = true; return; }
+    var h = parseInt(t.split(":")[0], 10);
+    var value = "none";
+    if(h >= 23 || h < 5) value = "profonde";
+    else if((h >= 20 && h < 23) || (h >= 5 && h < 8)) value = "soir";
+    auto.hidden = value === "none";
+    if(value !== "none"){
+      var radio = document.querySelector('input[name="mNuit"][value="'+value+'"]');
+      if(radio) radio.checked = true;
+    }
+  }
+  document.getElementById("fHeure").addEventListener("input", function(){ updateNuitSuggestion(); updatePreview(); });
+
+  function updateInitialsPreview(){
+    var ini = deriveInitials(document.getElementById("fPrenom").value, document.getElementById("fNom").value);
+    document.getElementById("initialsPreview").textContent = ini || "—";
+  }
+  document.getElementById("fPrenom").addEventListener("input", updateInitialsPreview);
+  document.getElementById("fNom").addEventListener("input", updateInitialsPreview);
+
+  ["mMau","mMci","mMie","fIfd","fKm","fSecteurType"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", updatePreview);
+    document.getElementById(id).addEventListener("change", updatePreview);
+  });
+  document.querySelectorAll('input[name="mNuit"]').forEach(function(r){ r.addEventListener("change", updatePreview); });
+  document.getElementById("mDimanche").addEventListener("change", updatePreview);
+
+  /* ---------- secteur (pour l'IK) : sélection dans la liste de secteurs configurés, ou saisie manuelle ---------- */
+  function populateSecteurSelect(){
+    var sel = document.getElementById("fSecteurSel");
+    var list = state.settings.secteurs || [];
+    var prevVal = sel.value;
+    sel.innerHTML = list.map(function(s){
+      return '<option value="'+s.id+'">'+escapeHtml(s.nom)+' — '+s.km+' km</option>';
+    }).join("") + '<option value="autre">Autre (kilométrage libre)</option>';
+    if(prevVal && sel.querySelector('option[value="'+prevVal+'"]')){
+      sel.value = prevVal;
+    } else {
+      sel.value = list.length ? list[0].id : "autre";
+    }
+    updateSecteurMode();
+  }
+  function currentSecteurObj(){
+    var sel = document.getElementById("fSecteurSel");
+    var id = sel ? sel.value : "autre";
+    if(!id || id === "autre") return null;
+    return (state.settings.secteurs || []).find(function(s){ return s.id === id; }) || null;
+  }
+  function updateSecteurMode(){
+    var s = currentSecteurObj();
+    var manualRow = document.getElementById("manualKmRow");
+    var note = document.getElementById("autoKmNote");
+    if(s){
+      manualRow.hidden = true;
+      note.hidden = false;
+      note.textContent = "→ " + s.km + " km, zone " + (s.type === "montagne" ? "montagne" : "plaine") + " (secteur enregistré — modifiable dans les réglages).";
+    } else {
+      manualRow.hidden = false;
+      note.hidden = true;
+    }
+    updatePreview();
+  }
+  document.getElementById("fSecteurSel").addEventListener("change", updateSecteurMode);
+  populateSecteurSelect();
+
+  function currentMajo(){
+    var nuit = document.querySelector('input[name="mNuit"]:checked');
+    return {
+      mau: document.getElementById("mMau").checked,
+      mci: document.getElementById("mMci").checked,
+      mie: document.getElementById("mMie").checked,
+      nuit: nuit ? nuit.value : "none",
+      dimanche: document.getElementById("mDimanche").checked
+    };
+  }
+
+  function currentDraft(){
+    var chosenSecteur = currentSecteurObj();
+    var v = {
+      patient: deriveInitials(document.getElementById("fPrenom").value, document.getElementById("fNom").value),
+      // Le secteur choisi fait aussi office de lieu affiché dans le carnet.
+      lieu: chosenSecteur ? chosenSecteur.nom : "",
+      type: currentType,
+      majo: currentMajo(),
+      ifd: document.getElementById("fIfd").checked,
+      // Un secteur configuré fournit km + zone automatiquement ; sinon saisie manuelle (fKm + fSecteurType).
+      km: chosenSecteur ? chosenSecteur.km : document.getElementById("fKm").value,
+      secteur: chosenSecteur ? chosenSecteur.type : document.getElementById("fSecteurType").value,
+      secteurNom: chosenSecteur ? chosenSecteur.nom : ""
+    };
+    if(currentType === "AMI"){
+      v.acts = Object.keys(selectedActs).map(function(id){ return selectedActs[id]; });
+    } else if(currentType === "BSI"){
+      var bsiEl = document.querySelector('input[name="bsiChoice"]:checked');
+      v.bsi = bsiEl ? bsiEl.value : "bsa";
+      v.amxActs = Object.keys(selectedAmx).map(function(id){ return selectedAmx[id]; });
+    } else {
+      var mEl = document.getElementById("fMontant");
+      v.montant = mEl ? mEl.value : 0;
+    }
+    return v;
+  }
+
+  function updatePreview(){
+    // Live preview always uses CURRENT settings — nothing is frozen until the visit is actually saved.
+    var t = computeLine(currentDraft(), state.settings);
+    document.getElementById("livePreview").textContent = fmtEUR(t.total);
+    var lines = [];
+    t.baseDetail.forEach(function(d){
+      var pctTxt = d.notBilled ? " (non facturé)" : (d.pct === 0.5 ? " (50%)" : "");
+      lines.push('<div class="line"><span>'+escapeHtml(d.label)+(d.coef?" — AMI "+d.coef:"")+pctTxt+'</span><span class="num">'+fmtEUR(d.amt)+'</span></div>');
+    });
+    t.majoDetail.forEach(function(d){
+      lines.push('<div class="line"><span>'+escapeHtml(d.label)+'</span><span class="num">'+fmtEUR(d.amt)+'</span></div>');
+    });
+    if(t.ifd > 0) lines.push('<div class="line"><span>IFD</span><span class="num">'+fmtEUR(t.ifd)+'</span></div>');
+    if(t.ik > 0) lines.push('<div class="line"><span>Indemnités kilométriques</span><span class="num">'+fmtEUR(t.ik)+'</span></div>');
+    var box = document.getElementById("previewBreakdown");
+    if(lines.length){
+      box.innerHTML = lines.join("") + '<div class="line" style="font-weight:700; border-top:1px solid color-mix(in srgb, var(--accent-strong) 30%, transparent); margin-top:4px; padding-top:4px;"><span>Total visite</span><span class="num">'+fmtEUR(t.total)+'</span></div>';
+    } else {
+      box.innerHTML = '<div class="note">Sélectionnez au moins un acte pour voir le détail du calcul.</div>';
+    }
+  }
+
+  renderTypeFields();
+  updateDimancheSuggestion();
+
+  document.getElementById("visitForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = currentDraft();
+    v.id = uid();
+    v.date = currentDate;
+    if(!v.patient) v.patient = "Sans nom";
+    freezeVisit(v, state.settings); // freeze computed + tariffsSnapshot NOW, once, forever
+    state.visits.push(v);
+    saveState();
+
+    document.getElementById("fPrenom").value = "";
+    document.getElementById("fNom").value = "";
+    updateInitialsPreview();
+    document.getElementById("fKm").value = "0";
+    document.getElementById("fIfd").checked = false;
+    document.getElementById("fHeure").value = "";
+    document.getElementById("fSecteurType").value = "plaine";
+    updateSecteurMode();
+    document.getElementById("mMau").checked = false;
+    document.getElementById("mMci").checked = false;
+    document.getElementById("mMie").checked = false;
+    document.querySelector('input[name="mNuit"][value="none"]').checked = true;
+    selectedActs = {}; selectedAmx = {};
+    currentType = "AMI";
+    Array.prototype.forEach.call(typeToggle.querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-type")==="AMI" ? "true":"false"); });
+    renderTypeFields();
+    updateDimancheSuggestion();
+    renderAll();
+    document.getElementById("fPrenom").focus();
+  });
+
+  /* ---------- day navigation ---------- */
+  var dayPicker = document.getElementById("dayPicker");
+  dayPicker.value = currentDate;
+  var weekAnchor = currentDate; // jour de référence pour la semaine affichée — suit currentDate sauf navigation semaine explicite
+  dayPicker.addEventListener("change", function(){
+    currentDate = dayPicker.value || todayISO();
+    weekAnchor = currentDate;
+    updateDimancheSuggestion();
+    renderAll();
+  });
+  document.getElementById("prevDay").addEventListener("click", function(){
+    var d = new Date(currentDate + "T00:00:00");
+    d.setDate(d.getDate()-1);
+    currentDate = todayISO(d);
+    weekAnchor = currentDate;
+    dayPicker.value = currentDate;
+    updateDimancheSuggestion();
+    renderAll();
+  });
+  document.getElementById("nextDay").addEventListener("click", function(){
+    var d = new Date(currentDate + "T00:00:00");
+    d.setDate(d.getDate()+1);
+    currentDate = todayISO(d);
+    weekAnchor = currentDate;
+    dayPicker.value = currentDate;
+    updateDimancheSuggestion();
+    renderAll();
+  });
+  document.getElementById("prevWeek").addEventListener("click", function(){
+    var d = new Date(weekAnchor + "T00:00:00");
+    d.setDate(d.getDate()-7);
+    weekAnchor = todayISO(d);
+    renderWeek();
+  });
+  document.getElementById("nextWeek").addEventListener("click", function(){
+    var d = new Date(weekAnchor + "T00:00:00");
+    d.setDate(d.getDate()+7);
+    weekAnchor = todayISO(d);
+    renderWeek();
+  });
+
+  /* ---------- ledger render (reads state.visits, filtered by date — never recomputes) ---------- */
+  var monthNames = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  var dayNames = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+
+  function visitsForDate(iso){
+    return state.visits.filter(function(v){ return v.date === iso; });
+  }
+
+  /* ---------- vue hebdomadaire (lundi -> dimanche) : CA brut jour par jour ---------- */
+  function renderWeek(){
+    var monday = mondayOf(weekAnchor || currentDate);
+    var d0 = new Date(monday + "T00:00:00");
+    var days = [];
+    for(var i=0;i<7;i++){
+      var dd = new Date(d0); dd.setDate(d0.getDate()+i);
+      var iso = todayISO(dd);
+      var total = 0, net = 0;
+      visitsForDate(iso).forEach(function(v){ total += v.computed.total; net += visitNet(v, state.settings); });
+      days.push({iso:iso, date:dd, total:total, net:net});
+    }
+    document.getElementById("weekLabel").textContent =
+      days[0].date.getDate()+" "+monthNames[days[0].date.getMonth()].slice(0,3)+" – "+days[6].date.getDate()+" "+monthNames[days[6].date.getMonth()].slice(0,3);
+
+    var grid = document.getElementById("weekGrid");
+    grid.innerHTML = days.map(function(x){
+      var short = dayNames[x.date.getDay()].slice(0,3);
+      var sel = x.iso === currentDate ? " selected" : "";
+      return '<div class="week-tile'+sel+'" data-iso="'+x.iso+'">' +
+        '<span class="wt-day">'+short+'</span>' +
+        '<span class="wt-date">'+x.date.getDate()+'</span>' +
+        '<span class="wt-total num">'+(x.total > 0 ? fmtEUR(x.total).replace(" €","€") : "—")+'</span>' +
+      '</div>';
+    }).join("");
+    Array.prototype.forEach.call(grid.querySelectorAll(".week-tile"), function(t){
+      t.addEventListener("click", function(){
+        currentDate = t.getAttribute("data-iso");
+        dayPicker.value = currentDate;
+        updateDimancheSuggestion();
+        renderAll();
+      });
+    });
+
+    var weekTotal = days.reduce(function(s,x){ return s+x.total; }, 0);
+    var weekNetTotal = days.reduce(function(s,x){ return s+x.net; }, 0);
+    document.getElementById("weekTotal").textContent = fmtEUR(weekTotal);
+    document.getElementById("weekNet").textContent = fmtEUR(weekNetTotal);
+  }
+
+  function acteSummary(v){
+    if(v.type === "AMI"){
+      return (v.acts||[]).map(function(a){ return a.label+" (AMI "+a.coef+")"; }).join(", ") || "—";
+    }
+    if(v.type === "BSI"){
+      var s = (v.bsi||"bsa").toUpperCase();
+      if(v.amxActs && v.amxActs.length) s += " + " + v.amxActs.map(function(a){ return a.label+" (AMX "+a.coef+")"; }).join(", ");
+      return s;
+    }
+    return "Montant libre";
+  }
+  function majoPills(v){
+    var out = "";
+    var m = v.majo || {};
+    if(m.mau) out += '<span class="pill">MAU</span>';
+    if(m.mci) out += '<span class="pill">MCI</span>';
+    if(m.mie) out += '<span class="pill">MIE</span>';
+    if(m.nuit === "soir") out += '<span class="pill">Nuit</span>';
+    if(m.nuit === "profonde") out += '<span class="pill">Nuit profonde</span>';
+    if(m.dimanche) out += '<span class="pill">Dim./férié</span>';
+    if(v.ifd) out += '<span class="pill">IFD</span>';
+    return out;
+  }
+
+  function renderLedger(){
+    var visits = visitsForDate(currentDate);
+    var body = document.getElementById("ledgerBody");
+    var d = new Date(currentDate + "T00:00:00");
+    document.getElementById("ledgerDateLabel").textContent = dayNames[d.getDay()] + " " + d.getDate() + " " + monthNames[d.getMonth()] + " " + d.getFullYear();
+
+    var hasDemo = visits.some(function(v){ return v.demo; });
+    document.getElementById("demoBanner").hidden = !hasDemo;
+
+    body.innerHTML = "";
+    var dayTotal = 0, dayKm = 0, dayNetTotal = 0;
+
+    if(visits.length === 0){
+      body.innerHTML = '<tr><td colspan="5"><div class="empty-ledger">Aucune visite enregistrée pour ce jour. Ajoutez la première ci-dessus.</div></td></tr>';
+    } else {
+      visits.forEach(function(v){
+        var c = v.computed; // frozen at creation — never recomputed
+        dayTotal += c.total;
+        dayNetTotal += visitNet(v, state.settings);
+        dayKm += Number(v.km)||0;
+        var tr = document.createElement("tr");
+        tr.innerHTML =
+          '<td>' + escapeHtml(v.patient) + (v.demo ? ' <span class="pill demo">exemple</span>' : '') + '<div class="acte-detail">'+escapeHtml(v.lieu || "")+'</div></td>' +
+          '<td>' + escapeHtml(acteSummary(v)) + '<div style="margin-top:4px;">'+majoPills(v)+'</div></td>' +
+          '<td class="num">' + (c.ik > 0 ? fmtEUR(c.ik) : '—') + '</td>' +
+          '<td class="num total">' + fmtEUR(c.total) + '</td>' +
+          '<td></td>';
+        var delTd = tr.lastElementChild;
+        var delBtn = document.createElement("button");
+        delBtn.className = "row-del";
+        delBtn.setAttribute("aria-label","Supprimer la visite");
+        delBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+        delBtn.addEventListener("click", function(){
+          state.visits = state.visits.filter(function(x){ return x.id !== v.id; });
+          saveState();
+          renderAll();
+        });
+        delTd.appendChild(delBtn);
+        body.appendChild(tr);
+      });
+    }
+
+    document.getElementById("ledgerFooterTotal").textContent = fmtEUR(dayTotal);
+    document.getElementById("ledgerFooterNet").textContent = fmtEUR(dayNetTotal);
+    document.getElementById("dayTotal").textContent = fmtEUR(dayTotal);
+    document.getElementById("dayNet").textContent = fmtEUR(dayNetTotal);
+    document.getElementById("dayVisits").textContent = String(visits.length);
+    document.getElementById("dayKm").textContent = (Math.round(dayKm*10)/10).toString().replace(".",",") + " km";
+  }
+
+  document.getElementById("clearDemo").addEventListener("click", function(){
+    state.visits = state.visits.filter(function(v){ return !v.demo; });
+    saveState();
+    renderAll();
+  });
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  /* ---------- month chart (sums frozen v.computed.total — never recomputes) : par jour OU agrégé par semaine ---------- */
+  var chartMode = "day";
+  var chartModeToggle = document.getElementById("chartModeToggle");
+  Array.prototype.forEach.call(chartModeToggle.querySelectorAll("button"), function(btn){
+    btn.addEventListener("click", function(){
+      Array.prototype.forEach.call(chartModeToggle.querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed","false"); });
+      btn.setAttribute("aria-pressed","true");
+      chartMode = btn.getAttribute("data-mode");
+      renderChart();
+    });
+  });
+
+  function renderChart(){
+    var d = new Date(currentDate + "T00:00:00");
+    var y = d.getFullYear(), m = d.getMonth();
+    document.getElementById("monthLabel").textContent = monthNames[m] + " " + y;
+    var daysInMonth = new Date(y, m+1, 0).getDate();
+
+    var dailyData = [];
+    var monthTotal = 0;
+    for(var i=1;i<=daysInMonth;i++){
+      var iso = y + "-" + String(m+1).padStart(2,"0") + "-" + String(i).padStart(2,"0");
+      var total = 0;
+      visitsForDate(iso).forEach(function(v){ total += v.computed.total; });
+      monthTotal += total;
+      dailyData.push({iso:iso, day:i, total:total});
+    }
+    document.getElementById("monthTotal").textContent = fmtEUR(monthTotal);
+
+    var data;
+    if(chartMode === "week"){
+      var order = [], map = {};
+      dailyData.forEach(function(x){
+        var wk = mondayOf(x.iso);
+        if(!map[wk]){ map[wk] = 0; order.push(wk); }
+        map[wk] += x.total;
+      });
+      var curWk = mondayOf(currentDate);
+      data = order.map(function(wk, idx){
+        var dd = new Date(wk + "T00:00:00");
+        return {
+          key: wk,
+          label: "S" + (idx+1),
+          tooltipLabel: "Semaine du " + dd.getDate() + " " + monthNames[dd.getMonth()].slice(0,3),
+          total: map[wk],
+          isCurrent: wk === curWk
+        };
+      });
+    } else {
+      data = dailyData.map(function(x){
+        return {
+          key: x.iso,
+          label: String(x.day),
+          tooltipLabel: x.day + " " + monthNames[m].slice(0,3),
+          total: x.total,
+          isCurrent: x.iso === currentDate
+        };
+      });
+    }
+
+    var svg = document.getElementById("monthChart");
+    var wrapWidth = svg.parentElement.clientWidth || 640;
+    var perItem = chartMode === "week" ? 56 : 16;
+    var width = Math.max(wrapWidth, data.length * perItem);
+    var height = 150;
+    var padLeft = 34, padBottom = 20, padTop = 10;
+    var plotW = width - padLeft - 8;
+    var plotH = height - padTop - padBottom;
+    var maxVal = Math.max.apply(null, data.map(function(x){return x.total;}).concat([1]));
+    var niceMax = maxVal <= 0 ? 100 : Math.ceil(maxVal / 50) * 50;
+
+    svg.setAttribute("width", width);
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+
+    var barW = Math.min(chartMode === "week" ? 38 : 14, (plotW / data.length) * 0.62);
+    var step = plotW / data.length;
+
+    var css = getComputedStyle(document.documentElement);
+    var lineColor = css.getPropertyValue("--line").trim();
+    var mutedColor = css.getPropertyValue("--muted").trim();
+    var accentColor = css.getPropertyValue("--accent").trim();
+    var accentStrong = css.getPropertyValue("--accent-strong").trim();
+
+    var parts = [];
+    [0, 0.5, 1].forEach(function(frac){
+      var yy = padTop + plotH * (1 - frac);
+      parts.push('<line x1="'+padLeft+'" x2="'+width+'" y1="'+yy+'" y2="'+yy+'" stroke="'+lineColor+'" stroke-width="1"/>');
+      parts.push('<text class="axis-label" x="'+(padLeft-6)+'" y="'+(yy+3)+'" text-anchor="end" fill="'+mutedColor+'">'+Math.round(niceMax*frac)+'</text>');
+    });
+
+    data.forEach(function(x, idx){
+      var bx = padLeft + idx*step + (step-barW)/2;
+      var h = niceMax > 0 ? (x.total/niceMax)*plotH : 0;
+      var by = padTop + plotH - h;
+      parts.push('<rect data-key="'+x.key+'" data-total="'+x.total.toFixed(2)+'" data-tooltip="'+escapeHtml(x.tooltipLabel)+'" x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+Math.max(h,0).toFixed(1)+'" rx="3" fill="'+(x.isCurrent?accentStrong:accentColor)+'" opacity="'+(x.total>0?1:0.16)+'"></rect>');
+      var showLabel = chartMode === "week" ? true : (idx % (daysInMonth > 20 ? 5 : 3) === 0 || idx === data.length-1);
+      if(showLabel){
+        parts.push('<text class="axis-label" x="'+(bx+barW/2).toFixed(1)+'" y="'+(height-4)+'" text-anchor="middle" fill="'+mutedColor+'">'+x.label+'</text>');
+      }
+    });
+
+    svg.innerHTML = parts.join("");
+
+    var tooltip = document.getElementById("chartTooltip");
+    var rects = svg.querySelectorAll("rect[data-key]");
+    Array.prototype.forEach.call(rects, function(r){
+      r.addEventListener("mouseenter", function(e){
+        var total = parseFloat(r.getAttribute("data-total"));
+        var label = r.getAttribute("data-tooltip");
+        tooltip.textContent = label + " — " + fmtEUR(total);
+        tooltip.style.opacity = "1";
+        positionTooltip(e);
+      });
+      r.addEventListener("mousemove", positionTooltip);
+      r.addEventListener("mouseleave", function(){ tooltip.style.opacity = "0"; });
+    });
+    function positionTooltip(e){
+      var relRect = svg.parentElement.parentElement.getBoundingClientRect();
+      tooltip.style.left = (e.clientX - relRect.left) + "px";
+      tooltip.style.top = (e.clientY - relRect.top) + "px";
+    }
+  }
+
+  /* ---------- backup ---------- */
+  function refreshExport(){
+    document.getElementById("exportArea").value = JSON.stringify(state, null, 2);
+  }
+
+  document.getElementById("downloadBackup").addEventListener("click", function(){
+    try{
+      var blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      var stamp = todayISO().replace(/-/g,"");
+      a.href = url;
+      a.download = "carnet-tournee-sauvegarde-" + stamp + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+    }catch(e){
+      alert("Le téléchargement direct n'a pas fonctionné sur ce navigateur — utilisez le copier-coller ci-dessous à la place.");
+    }
+  });
+
+  document.getElementById("restoreFile").addEventListener("change", function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){ applyImport(String(reader.result)); e.target.value = ""; };
+    reader.onerror = function(){ alert("Impossible de lire ce fichier."); };
+    reader.readAsText(file);
+  });
+
+  document.getElementById("copyExport").addEventListener("click", function(){
+    var area = document.getElementById("exportArea");
+    var status = document.getElementById("copyStatus");
+    var done = function(){ status.hidden = false; setTimeout(function(){ status.hidden = true; }, 1800); };
+    try{
+      navigator.clipboard.writeText(area.value).then(done, function(){ fallbackCopy(area, done); });
+    }catch(e){ fallbackCopy(area, done); }
+  });
+  function fallbackCopy(area, done){
+    try{ area.removeAttribute("readonly"); area.select(); document.execCommand("copy"); area.setAttribute("readonly",""); done(); }catch(e){}
+  }
+
+  document.getElementById("doImport").addEventListener("click", function(){
+    var raw = document.getElementById("importArea").value.trim();
+    if(!raw) return;
+    if(applyImport(raw)) document.getElementById("importArea").value = "";
+  });
+
+  function applyImport(raw){
+    try{
+      var parsed = JSON.parse(raw);
+      if(!parsed || typeof parsed !== "object" || (!parsed.visits && !parsed.days)){ throw new Error("format"); }
+      if(!confirm("Remplacer toutes les données actuelles par cette sauvegarde ?")) return false;
+      if(parsed.visits && parsed.schemaVersion === SCHEMA_VERSION){
+        state = {schemaVersion: SCHEMA_VERSION, settings: withDefaults(parsed.settings||{}), visits: parsed.visits || []};
+      } else {
+        state = migrateFromLegacy(parsed);
+      }
+      saveState();
+      populateSecteurSelect();
+      renderSecteursList();
+      renderAll();
+      return true;
+    }catch(e){
+      alert("Ce fichier ne ressemble pas à une sauvegarde valide.");
+      return false;
+    }
+  }
+
+  /* ---------- render all ---------- */
+  function renderAll(){
+    renderLedger();
+    renderWeek();
+    renderChart();
+    refreshExport();
+    updatePreview();
+  }
+
+  window.addEventListener("resize", function(){ renderChart(); });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
